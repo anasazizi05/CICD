@@ -1,0 +1,224 @@
+{
+  "name": "practice 8 ex 1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "09b8d59d-34e9-4efc-9f2e-f3ac6ea32d3b",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -576,
+        112
+      ],
+      "id": "c220a559-1233-44d9-abb6-3a6d2b96d129",
+      "name": "Webhook",
+      "webhookId": "09b8d59d-34e9-4efc-9f2e-f3ac6ea32d3b"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "task",
+          "mode": "list",
+          "cachedResultName": "task"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "done": false,
+            "title": "={{ $json.body.title }}",
+            "description": "={{ $json.body.description }}",
+            "id": 12
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "done",
+              "displayName": "done",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c488b0a8-da1d-4e3f-b069-5c35a1c50a43",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "dnMU7vFzeFLlvLC1",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "queue": "task_created",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rabbitmq",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        0
+      ],
+      "id": "0794e10c-298f-4054-93be-58881515e037",
+      "name": "RabbitMQ",
+      "credentials": {
+        "rabbitmq": {
+          "id": "uvKrHEn1HMNHK6ru",
+          "name": "RabbitMQ account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "35e43bb6-7e35-4142-864a-8e7855b367d3",
+              "leftValue": "={{ $json.body.title }}",
+              "rightValue": "undefined",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -368,
+        112
+      ],
+      "id": "d80dfe44-d6af-4072-9fb8-399a4af70a31",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "errorMessage": "400: Le champ 'title' est obligatoire."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        96,
+        256
+      ],
+      "id": "5fb4fb92-c3e0-460b-93c3-4edc30fc8219",
+      "name": "Stop and Error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "RabbitMQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "27d6e260-4b66-4e29-8b53-8ac76b7e4080",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "70ba05cf7767f22534127d89a15c4365e4910dcb569e573e4ca89f1ac4a11c39"
+  },
+  "id": "ewUe0q0K15KWRbDT",
+  "tags": []
+}
