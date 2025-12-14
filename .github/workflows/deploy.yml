@@ -20,7 +20,7 @@ jobs:
           node-version: '18'
 
       - name: Install n8n-cli
-        run: npm install n8n-cli -g
+        run: npm install n8n -g
 
       - name: Deploy to Production
         env:
